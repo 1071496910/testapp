@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<header class="jumbotron" style="background-color:#A9F16C">
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.3/css/uikit.min.css"/>
+
+    <!-- UIkit JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.3/js/uikit.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.3/js/uikit-icons.min.js"></script>
+</header>
+
+<body>
+<div class="uk-position-medium uk-position-cover uk-overlay uk-overlay-default uk-flex uk-flex-center uk-flex-middle">
+    <form action="/app/doLogin" method="POST" class="uk-form-stacked">
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-stacked-text">Name</label>
+            <div class="uk-form-controls">
+                <input class="uk-input" name="name" id="name" type="text" placeholder="xxx@qq.com">
+            </div>
+        </div>
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-stacked-text">Password</label>
+            <div class="uk-form-controls">
+                <input class="uk-input" name="password" id="password" type="password" placeholder="passowrd">
+            </div>
+        </div>
+        <p uk-margin>
+            <button class="uk-button uk-button-default" type="submit">Login</button>
+            <a class="uk-button uk-button-default" href="/app/register">Sign up</a>
+
+        </p>
+    {{if or .errors .flash.error}}
+        <div class="alert alert-danger">
+        {{if .flash.error}}
+		    {{.flash.error}}
+	    {{end}}
+            <ul style="margin-top:10px;">
+            {{range .errors}}
+                <li >{{.}}</li>
+            {{end}}
+            </ul>
+        </div>
+    {{end}}
+    </form>
+</div>
+</body>
+
+
+{{template "footer.html" .}}
