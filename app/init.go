@@ -15,6 +15,8 @@ var (
 	BuildTime string
 
 	DB *sql.DB
+
+	TokenMap map[string]uint32
 )
 
 func init() {
@@ -40,6 +42,7 @@ func init() {
 	// ( order dependent )
 	// revel.OnAppStart(ExampleStartupScript)
 	revel.OnAppStart(InitDB)
+	revel.OnAppStart(InitTokenMap)
 	// revel.OnAppStart(FillCache)
 }
 
@@ -55,13 +58,17 @@ var HeaderFilter = func(c *revel.Controller, fc []revel.Filter) {
 	fc[0](c, fc[1:]) // Execute the next filter stage.
 }
 
-func InitDB()  {
-	var err  error
+func InitDB() {
+	var err error
 
-	DB, err = sql.Open("mysql","hpc:123456@tcp(localhost:3306)/mysh?allowNativePasswords=True")
+	DB, err = sql.Open("mysql", "hpc:123456@tcp(localhost:3306)/mysh?allowNativePasswords=True")
 	if err != nil {
 		panic(err)
 	}
+}
+
+func InitTokenMap() {
+	TokenMap = make(map[string]uint32)
 }
 
 //func ExampleStartupScript() {
