@@ -7,7 +7,7 @@ import (
 
 const (
     findByTagSQL = `select article.title
-from article right join art_tag on article.id = art_tag.art_id and art_tag.art_tag = ? and article.owner = ?;`
+from article right join art_tag on article.id = art_tag.art_id and  article.owner = ? and art_tag.art_tag = ? where article.title is not NULL;`
 )
 
 type Blog struct {
@@ -31,18 +31,27 @@ func (c Blog) Editor() revel.Result {
 func (c Blog) ArticleByTag(owner string, tag string) revel.Result {
 	stmt, err := app.DB.Prepare(findByTagSQL)
 	if err != nil {
-		return c.Render("")
+		return c.RenderError(err)
 	}
 	rows, err := stmt.Query(owner, tag)
 	if err != nil {
-		return c.Render("")
+		return c.RenderError(err)
 	}
-	result := []string
-	err = rows.Scan(result)
-	if err != nil {
-		return c.Render("")
+	result := []string{}
+	for rows.Next() {
+		tmp := ""
+		err = rows.Scan(&tmp)
+		c.Log.Debugf("In loop , get title %v\n", tmp)
+		if err != nil {
+			return c.RenderError(err)
+		}
+		result = append(result, tmp)
 	}
-	c.RenderText("")
+	c.Log.Debugf("Get result %v \n", result)
+
+	c.ViewArgs["result"] = result
+
+	return c.Render(result)
 }
 
 func (c Blog) Article(id string) revel.Result {
