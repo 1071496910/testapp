@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/revel/revel"
-	"github.com/revel/revel/logger"
+
 	"hash/adler32"
 	"net/http"
 	"net/url"
@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	registerSQL      = `INSERT INTO account ( Name, email, password, create_time) VALUES (?, ?, ?, ?);`
-	loginSQL         = `SELECT count(Name) FROM account WHERE Name = ? and password = ? ;`
-	cookieLoginKey   = "lastLoginInfo"
+	registerSQL = `INSERT INTO account ( Name, email, password, create_time) VALUES (?, ?, ?, ?);`
+	loginSQL    = `SELECT count(Name) FROM account WHERE Name = ? and password = ? ;`
+
 	customCookieName = "REVEL_CUSTOM_COOKIES"
 )
 
@@ -28,63 +28,10 @@ type loginInfo struct {
 	Time  time.Time `json:"time"`
 }
 
-func checkLogin(logger logger.MultiLogger, c *revel.Controller) bool {
-
-	cookie, err := c.Request.Cookie(customCookieName)
-	if err != nil {
-		return false
-	}
-	loginInfoStr, err := url.QueryUnescape(cookie.GetValue())
-	//loginInfoStr := cookie.GetValue()
-	logger.Debugf("In checkLogin() get cookie %v \n.", loginInfoStr)
-	if err != nil {
-		return false
-	}
-
-	if loginInfoStr == "" {
-		logger.Warnf("cookie is empty\n")
-		return false
-	}
-	lastLoginInfo := &loginInfo{}
-	if err := json.Unmarshal([]byte(loginInfoStr), lastLoginInfo); err != nil {
-		logger.Warnf("parse cookie error: %v\n", err)
-		return false
-	}
-
-	lastLoginTime := lastLoginInfo.Time
-	expireTime := lastLoginTime.Add(time.Hour)
-
-	if lastLoginTime.After(expireTime) {
-		return false
-	}
-
-	if lastLoginInfo.Token != app.TokenMap[lastLoginInfo.Name] {
-		logger.Warnf("User: %v token[%v] is not math server token[%v].\n",
-			lastLoginInfo.Name,
-			lastLoginInfo.Token,
-			app.TokenMap[lastLoginInfo.Name])
-		return false
-	}
-
-	lastLoginInfo.Time = time.Now()
-	data, err := json.Marshal(lastLoginInfo)
-	if err != nil {
-		return false
-	}
-	c.SetCookie(&http.Cookie{
-		HttpOnly: false,
-		Name:     customCookieName,
-		Value:    url.QueryEscape(string(data)),
-		Path:     "/",
-	})
-
-	return true
-}
-
 func (c App) Index() revel.Result {
 
 	if checkLogin(c.Log, c.Controller) {
-		return c.Redirect("/blog/editor")
+		return c.Redirect("/blog/home")
 	}
 
 	return c.Render()
@@ -142,7 +89,7 @@ func (c App) DoLogin(name, password string) revel.Result {
 	c.Log.Debugf("Set user: %v token: %v.\n", name, token)
 	app.TokenMap[name] = token
 
-	return c.Redirect("/blog/editor")
+	return c.Redirect("/blog/home")
 
 ErrHandler:
 	return c.RenderError(err)
@@ -167,18 +114,18 @@ func (c App) Test() revel.Result {
 }
 
 func (c App) DoReg(name, email, password string) revel.Result {
-	/*stmt, err := app.DB.Prepare(registerSQL)
+	stmt, err := app.DB.Prepare(registerSQL)
 	if err != nil {
 		goto ErrHandler
 	}
 	defer stmt.Close()
 
-	if _, err = stmt.Exec(Name, email, password, Time.Now()); err != nil {
+	if _, err = stmt.Exec(name, email, password, time.Now()); err != nil {
 		goto ErrHandler
-	}*/
+	}
 
 	return c.Render(name, password)
 
-	/*	ErrHandler:
-		return c.RenderError(err)*/
+ErrHandler:
+	return c.RenderError(err)
 }
