@@ -2,9 +2,8 @@ package app
 
 import (
 	"database/sql"
-	"github.com/revel/revel"
-
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/revel/revel"
 )
 
 var (
@@ -17,6 +16,14 @@ var (
 	DB *sql.DB
 
 	TokenMap map[string]uint32
+
+	ArticlePathPrefix = "D:/blog_data/"
+)
+
+const (
+	CustomCookieName = "REVEL_CUSTOM_COOKIES"
+
+	CookieLoginKey = "lastLoginInfo"
 )
 
 func init() {

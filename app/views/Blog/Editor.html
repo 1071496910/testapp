@@ -94,7 +94,7 @@
 
             $.post("save",
                     {
-                        title: $("#title-input").html(),
+                        title: $("#title-input").val(),
                         id: "{{.article}}",
                         md: mdContent.toString(),
                     },

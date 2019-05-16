@@ -13,85 +13,23 @@ import (
 	"time"
 )
 
-const (
-	cookieLoginKey = "lastLoginInfo"
-)
+func init() {
 
-type artInfo struct {
-	ID       string
-	Owner    string
-	Title    string
-	Location string
-	Content  string
+	revel.InterceptFunc(CheckLogin, revel.BEFORE, Blog{})
+	revel.InterceptFunc(CheckLogin, revel.BEFORE, Image{})
 }
 
-func GetArtInfoByID(id string) (*artInfo, error) {
-	if id == "" {
-		return nil, ErrIDEmpty
+// simple example or user auth
+func CheckLogin(c *revel.Controller) revel.Result {
+	if !checkLogin(c.Log, c) {
+		return c.Redirect("/")
 	}
-	stmt, err := app.DB.Prepare(findByIdSQL)
-	if err != nil {
-		return nil, err
-	}
-	defer stmt.Close()
-
-	rows, err := stmt.Query(id)
-	if err != nil {
-		return nil, err
-	}
-
-	artInfo := &artInfo{}
-	artInfo.ID = id
-
-	if rows.Next() {
-		err = rows.Scan(&artInfo.Owner, &artInfo.Title, &artInfo.Location)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	fp, err := os.Open(filepath.Join(articlePathPrefix, artInfo.Owner, artInfo.Location))
-	if err != nil {
-		return nil, err
-	}
-	data, err := ioutil.ReadAll(fp)
-	if err != nil {
-		return nil, err
-	}
-
-	artInfo.Content = string(data)
-
-	return artInfo, nil
-}
-
-func getLoginInfo(logger logger.MultiLogger, c *revel.Controller) (*loginInfo, error) {
-	cookie, err := c.Request.Cookie(customCookieName)
-	if err != nil {
-		return nil, err
-	}
-	loginInfoStr, err := url.QueryUnescape(cookie.GetValue())
-	//loginInfoStr := cookie.GetValue()
-	logger.Debugf("In checkLogin() get cookie %v \n.", loginInfoStr)
-	if err != nil {
-		return nil, err
-	}
-
-	if loginInfoStr == "" {
-		logger.Warnf("cookie is empty\n")
-		return nil, err
-	}
-	lastLoginInfo := &loginInfo{}
-	if err := json.Unmarshal([]byte(loginInfoStr), lastLoginInfo); err != nil {
-		logger.Warnf("parse cookie error: %v\n", err)
-		return nil, err
-	}
-
-	return lastLoginInfo, nil
+	return nil
 }
 
 func checkLogin(logger logger.MultiLogger, c *revel.Controller) bool {
 
-	lastLoginInfo, err := getLoginInfo(logger, c)
+	lastLoginInfo, err := GetLoginInfo(logger, c)
 	if err != nil {
 		return false
 	}
@@ -118,10 +56,90 @@ func checkLogin(logger logger.MultiLogger, c *revel.Controller) bool {
 	}
 	c.SetCookie(&http.Cookie{
 		HttpOnly: false,
-		Name:     customCookieName,
+		Name:     app.CustomCookieName,
 		Value:    url.QueryEscape(string(data)),
 		Path:     "/",
 	})
 
 	return true
+}
+
+type ArtInfo struct {
+	ID       string
+	Owner    string
+	Title    string
+	Location string
+	Content  string
+}
+
+const findByIdSQL = `select  owner, title, location from article where id = ? ;`
+
+func GetArtInfoByID(id string) (*ArtInfo, error) {
+	if id == "" {
+		return nil, ErrIDEmpty
+	}
+	stmt, err := app.DB.Prepare(findByIdSQL)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(id)
+	if err != nil {
+		return nil, err
+	}
+
+	artInfo := &ArtInfo{}
+	artInfo.ID = id
+
+	if rows.Next() {
+		err = rows.Scan(&artInfo.Owner, &artInfo.Title, &artInfo.Location)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	fp, err := os.Open(filepath.Join(app.ArticlePathPrefix, artInfo.Owner, artInfo.Location))
+	if err != nil {
+		return nil, err
+	}
+	data, err := ioutil.ReadAll(fp)
+	if err != nil {
+		return nil, err
+	}
+
+	artInfo.Content = string(data)
+
+	return artInfo, nil
+}
+
+func GetLoginInfo(logger logger.MultiLogger, c *revel.Controller) (*LoginInfo, error) {
+	cookie, err := c.Request.Cookie(app.CustomCookieName)
+	if err != nil {
+		return nil, err
+	}
+	LoginInfoStr, err := url.QueryUnescape(cookie.GetValue())
+	//LoginInfoStr := cookie.GetValue()
+	logger.Debugf("In CheckLogin() get cookie %v \n.", LoginInfoStr)
+	if err != nil {
+		return nil, err
+	}
+
+	if LoginInfoStr == "" {
+		logger.Warnf("cookie is empty\n")
+		return nil, err
+	}
+	lastLoginInfo := &LoginInfo{}
+	if err := json.Unmarshal([]byte(LoginInfoStr), lastLoginInfo); err != nil {
+		logger.Warnf("parse cookie error: %v\n", err)
+		return nil, err
+	}
+
+	return lastLoginInfo, nil
+}
+
+type LoginInfo struct {
+	Name  string    `json:"name"`
+	Token uint32    `json:"token"`
+	Time  time.Time `json:"time"`
 }
