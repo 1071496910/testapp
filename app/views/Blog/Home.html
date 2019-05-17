@@ -15,7 +15,7 @@
 
         #block-article  {
             position: absolute;
-            top: 30%;
+            top: 22%;
             left: 15%;
             width: 47.5%;
             border-left: #D3D3D3 solid 1px;
@@ -25,28 +25,56 @@
         }
         #block-user  {
             position: absolute;
-            top: 35%;
+            top: 25%;
             left: 77%;
             width: 25%;
         }
         #block-tags  {
             position: absolute;
-            top: 70%;
+            top: 55%;
             left: 77%;
             width: 25%;
         }
+        .btns-div {
+            position: absolute;
+            top: 10%;
+            padding-left: 74.5%;
+            border-bottom: #D3D3D3 solid 1px;
+            width: 100%;
+        }
+       .custom-btn {
+           width: 20%;
+           border-right: none;
+           border-bottom: none;
+           border-top: none;
+           margin-bottom: 5px;
+       }
     </style>
     <script type="text/javascript">
         $(function () {
             function updateArtList(tag) {
-                $("#block-article").html(
-                        "<h1> new article1 by " + tag.innerHTML  + " </h1>" )
+                        getArtList(tag)
+            }
+
+            function getArtList(tag) {
+                var filter;
+                if (!tag) {
+                    filter = ""
+                } else {
+                    filter = tag.innerHTML
+                }
+                $.get("/blog/articleByTag?tag="+filter,function (data) {
+                    $("#article-list").html(data)
+                });
+
             }
 
             $(".art-tag").click(function () {
                 console.log(this);
                 updateArtList(this);
-            })
+            });
+
+            updateArtList();
         });
 
     </script>
@@ -55,14 +83,19 @@
 
 <body >
 <header class="uk-heading-divider">
-    <h1> hpc's blog</h1>
+    <h1> {{.owner}}'s blog</h1>
 </header>
+
+<div class="btns-div" btns>
+    <a class="uk-button uk-button-default custom-btn" id="edit-md-btn"
+       href="/blog/editor?article="><span uk-icon="icon: file-edit"></span> New</a>
+</div>
 
 {{/*<div class="uk-divider-vertical uk-sticky" style="position: sticky; top: 0; float: left; margin-left: 17%; height: 300px" ></div>*/}}
 {{/*<hr  style="position: sticky; float: right; height: 100px; top: 0;">*/}}
 <div  id="block-article">
 
-    <dl class="uk-description-list uk-description-list-divider">
+    <dl id="article-list" class="uk-description-list uk-description-list-divider">
         <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
         <dd> 2019-5-17 11:23:00 </dd>
         <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
@@ -105,7 +138,7 @@
 </style>
 <div id="block-user">
     <div class="uk-heading-divider">
-        <img src="" width="60px" height="100px"  uk-img >
+        <img src="/public/5/test.png" width="60px" height="100px"  uk-img ><br>
         <span class="uinfo" uk-icon="mail"></span><span>  test12314124124@qq.com</span><br>
         <span class="uinfo" uk-icon="location"></span><span>  广东省珠海市 </span><br>
         <span class="uinfo" uk-icon="github"></span><span>  1071496910 </span><br>

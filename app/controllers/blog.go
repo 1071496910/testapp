@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"errors"
 	"github.com/revel/revel"
 	"io/ioutil"
@@ -11,8 +12,9 @@ import (
 )
 
 const (
-	findByTagSQL = `select article.title
+	findByTagSQL = `select article.id,article.title
 from article right join art_tag on article.id = art_tag.art_id and  article.owner = ? and art_tag.art_tag = ? where article.title is not NULL;`
+	ListSQL = `select id,title from article where owner=? ;`
 
 	addNewFileSQL = `insert into article (owner, title, location) values (?, ?, 'nil');`
 	updateFileSQL = `update article set title=? , location=?  where id=?;`
@@ -29,7 +31,11 @@ type Blog struct {
 }
 
 func (c Blog) Home(name string) revel.Result {
-
+	loginInfo,err := GetLoginInfo(c.Log,c.Controller)
+	if err != nil {
+	    return c.RenderError(err)
+	}
+	c.ViewArgs["owner"] = loginInfo.Name
 	return c.Render()
 }
 
@@ -49,32 +55,50 @@ func (c Blog) Editor(article string) revel.Result {
 	return c.Render(article)
 }
 
-func (c Blog) ArticleByTag(owner string, tag string) revel.Result {
-	stmt, err := app.DB.Prepare(findByTagSQL)
+func (c Blog) ArticleByTag(tag string) revel.Result {
+
+	loginInfo, err := GetLoginInfo(c.Log, c.Controller)
+	if err != nil {
+	    return c.RenderError(err)
+	}
+	owner := loginInfo.Name
+
+	stmt := &sql.Stmt{}
+	if tag != "" {
+		stmt, err = app.DB.Prepare(findByTagSQL)
+	} else {
+		stmt, err = app.DB.Prepare(ListSQL)
+	}
 	if err != nil {
 		return c.RenderError(err)
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(owner, tag)
+	rows := &sql.Rows{}
+	if tag != "" {
+		rows, err = stmt.Query(owner, tag)
+	}  else {
+		rows, err = stmt.Query(owner)
+	}
 	if err != nil {
 		return c.RenderError(err)
 	}
-	result := []string{}
+	result := map[string]string{}
 	for rows.Next() {
-		tmp := ""
-		err = rows.Scan(&tmp)
-		c.Log.Debugf("In loop , get title %v\n", tmp)
+		id := ""
+		title := ""
+		err = rows.Scan(&id, &title)
+		c.Log.Debugf("In loop , get id %v, get title %v\n", id, title)
 		if err != nil {
 			return c.RenderError(err)
 		}
-		result = append(result, tmp)
+		result[id] = title
 	}
 	c.Log.Debugf("Get result %v \n", result)
 
 	c.ViewArgs["result"] = result
 
-	return c.Render(result)
+	return c.Render()
 }
 
 func (c Blog) Article(article string) revel.Result {

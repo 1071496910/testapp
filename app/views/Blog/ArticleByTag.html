@@ -1,4 +1,4 @@
-{{- range $i, $art_title := .result }}
-
-<h1>{{$art_title}}</h1>
+{{- range $id, $art_title := .result }}
+<dt><h1><a href="/blog/read?id={{$id}}">{{$art_title}} </a></h1></dt>
+<dd> 2019-5-17 11:23:00 </dd>
 {{- end}}
