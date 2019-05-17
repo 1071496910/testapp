@@ -14,13 +14,12 @@
 <body>
 <div id="layout">
     <header>
-    {{/*<h1>标题</h1>*/}}
-
         <div>
             <input class="uk-button uk-button-default" id="title-input" name="title" value="{{.title}}">
         </div>
     </header>
-    <div class="btns">
+    <div uk-margin class="btns">
+        <a style="padding: 8px 10px" class="uk-button uk-button-default" id="home-btn" href="/blog/home" >Home</a>
         <button class="uk-button uk-button-default" id="save-md-btn">Save</button>
         <button class="uk-button uk-button-default" id="get-md-btn">Get Markdown</button>
         <button class="uk-button uk-button-default" id="get-html-btn">Get HTML</button>
@@ -91,12 +90,14 @@
 
         $("#save-md-btn").bind('click', function () {
             mdContent = onlineEditor.getMarkdown();
+            htmlContent = onlineEditor.getHTML();
 
             $.post("save",
                     {
                         title: $("#title-input").val(),
                         id: "{{.article}}",
                         md: mdContent.toString(),
+                        html: htmlContent.toString()
                     },
                     function (data, status) {
                         alert("Save access");
@@ -164,8 +165,7 @@
                     var blob = item.getAsFile();
                     var data = new FormData();
                     data.append('data', blob);
-                    data.append('owner', 'test');
-                    data.append('artID', '2');
+                    data.append('artID', {{.article}});
                     data.append('imageName', 'test.png');
                     jQuery.ajax({
                         url: '/image/upload',
@@ -175,6 +175,8 @@
                         processData: false,
                         type: 'POST', // For jQuery < 1.9
                         success: function (data) {
+                            data = data.replace(/\\/g,'/')
+                            onlineEditor.insertValue("![]("+data+")")
                             console.log(data);
                         }
                     })

@@ -6,47 +6,33 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.3/css/uikit.css"/>
 
     <!-- UIkit JS -->
-    <link rel="script" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.3/js/uikit.min.js">
-    <link rel="script" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.3/js/uikit-icons.min.js">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.4/js/uikit.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.4/js/uikit-icons.min.js"></script>
 
     <!-- JQuery JS -->
     <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
    <style>
 
-        .tiny-gray-border {
-            border: thin #D3D3D3 solid;
-        }
-
-        #placeholder-top {
-            position: absolute;
-            top: 20%;
-            left: 0;
-            border-bottom: thin #D3D3D3 solid;
-        }
-
-        #placeholder-left {
-            position: sticky;
-            left: 0;
-            top: 15%;
-            width: 1px;
-        }
-
         #block-article  {
             position: absolute;
-            top: 22%;
-            left: 20%;
+            top: 30%;
+            left: 15%;
             width: 47.5%;
+            border-left: #D3D3D3 solid 1px;
+            border-right: #D3D3D3 solid 1px;
+            padding-left: 5%;
+            padding-right: 7%;
         }
         #block-user  {
             position: absolute;
-            top: 22%;
-            left: 72.5%;
+            top: 35%;
+            left: 77%;
             width: 25%;
         }
         #block-tags  {
             position: absolute;
-            top: 60%;
-            left: 72.5%;
+            top: 70%;
+            left: 77%;
             width: 25%;
         }
     </style>
@@ -72,39 +58,71 @@
     <h1> hpc's blog</h1>
 </header>
 
-<div class="uk-divider-vertical uk-sticky" style="position: sticky; top: 0; float: left; margin-left: 17%; height: 300px" ></div>
+{{/*<div class="uk-divider-vertical uk-sticky" style="position: sticky; top: 0; float: left; margin-left: 17%; height: 300px" ></div>*/}}
 {{/*<hr  style="position: sticky; float: right; height: 100px; top: 0;">*/}}
-<div id="block-article">
-    <div>
-        <a href="/blog/editor?article=1" > article1 </a>
-        <div> 2019-5-14 </div>
-    </div>
+<div  id="block-article">
 
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
-    <h1> article1</h1>
+    <dl class="uk-description-list uk-description-list-divider">
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+        <dt><h1><a href="/blog/read?id=5">Description term </a></h1></dt>
+        <dd> 2019-5-17 11:23:00 </dd>
+
+    </dl>
+
 </div>
-<div id="block-user" class="uk-card uk-card-default uk-card-small">
-    <img src="" width="60px" height="100px"  uk-img >
-    <div class="uk-text-left@s uk-card-body">
-        联系方式：test.qq.com
+<style>
+    .uinfo {
+        padding: 15px 5px;
+    }
+    .art-tag {
+        margin: 15px 5px;
+    }
+</style>
+<div id="block-user">
+    <div class="uk-heading-divider">
+        <img src="" width="60px" height="100px"  uk-img >
+        <span class="uinfo" uk-icon="mail"></span><span>  test12314124124@qq.com</span><br>
+        <span class="uinfo" uk-icon="location"></span><span>  广东省珠海市 </span><br>
+        <span class="uinfo" uk-icon="github"></span><span>  1071496910 </span><br>
+        <span class="uinfo" uk-icon="receiver"></span><span>  150xxxx9880 </span><br>
     </div>
 </div>
 <div id="block-tags" class="uk-card uk-card-default uk-card-small">
-    <span class="uk-badge art-tag">test</span>
+    <span class="uk-label art-tag">test</span>
+    <span class="uk-label art-tag">test2</span>
+    <span class="uk-label art-tag">test3</span>
+    <span class="uk-label art-tag">test4</span>
+    <span class="uk-label art-tag">test5</span>
+    <span class="uk-label art-tag">test6</span>
+    <span class="uk-label art-tag">test7</span>
+    <span class="uk-label art-tag">test8</span>
+    <span class="uk-label art-tag">test9</span>
+
 </div>
 
 </body>

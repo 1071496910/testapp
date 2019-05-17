@@ -70,6 +70,7 @@ type ArtInfo struct {
 	Title    string
 	Location string
 	Content  string
+	HTML     string
 }
 
 const findByIdSQL = `select  owner, title, location from article where id = ? ;`
@@ -109,6 +110,17 @@ func GetArtInfoByID(id string) (*ArtInfo, error) {
 	}
 
 	artInfo.Content = string(data)
+
+	fp2, err := os.Open(filepath.Join(app.ArticlePathPrefix, artInfo.Owner, artInfo.Location+".html"))
+	if err != nil {
+		return nil, err
+	}
+	data2, err := ioutil.ReadAll(fp2)
+	if err != nil {
+		return nil, err
+	}
+
+	artInfo.HTML = string(data2)
 
 	return artInfo, nil
 }

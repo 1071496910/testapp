@@ -10,9 +10,9 @@ type Image struct {
 	*revel.Controller
 }
 
-func (c Image) Upload(owner string, artID string, imageName string, data []byte) revel.Result {
+func (c Image) Upload(artID string, imageName string, data []byte) revel.Result {
 
-	imgDir := filepath.Join("public", owner, artID)
+	imgDir := filepath.Join("/public/", artID)
 	err := os.MkdirAll(imgDir, 0755)
 	if err != nil {
 		c.Log.Error("Mkdir() error: %v\n", err)

@@ -14,7 +14,7 @@ const (
 	findByTagSQL = `select article.title
 from article right join art_tag on article.id = art_tag.art_id and  article.owner = ? and art_tag.art_tag = ? where article.title is not NULL;`
 
-	addNewFileSQL = `insert into article (owner, title, location) values ('?', '?', 'nil');`
+	addNewFileSQL = `insert into article (owner, title, location) values (?, ?, 'nil');`
 	updateFileSQL = `update article set title=? , location=?  where id=?;`
 )
 
@@ -37,11 +37,14 @@ func (c Blog) Editor(article string) revel.Result {
 
 	artInfo, err := GetArtInfoByID(article)
 	if err != nil {
+		if err == ErrIDEmpty {
+			return c.Render()
+		}
+
 		return c.RenderError(err)
 	}
 
 	c.Log.Debugf("Get artInfo %v\n", artInfo)
-
 	c.ViewArgs["title"] = artInfo.Title
 	return c.Render(article)
 }
@@ -86,9 +89,20 @@ func (c Blog) Article(article string) revel.Result {
 	return c.RenderJSON(artInfo.Content)
 }
 
-func (c Blog) Save(title, id, md string) revel.Result {
+func (c Blog) Read(id string) revel.Result {
+	artInfo, err := GetArtInfoByID(id)
 
-	c.Log.Debugf("title: %v, id %v, md %v.\n", title, id, md)
+	if err != nil {
+	    return c.RenderError(err)
+	}
+	c.ViewArgs["artHTML"] = artInfo.HTML
+	c.ViewArgs["owner"] = artInfo.Owner
+	return c.Render()
+}
+
+func (c Blog) Save(title, id, md, html string) revel.Result {
+
+	c.Log.Debugf("title: %v, id %v, md %v.\n", title, id, md, html)
 
 	lastLoginInfo, err := GetLoginInfo(c.Log, c.Controller)
 	if err != nil {
@@ -98,6 +112,7 @@ func (c Blog) Save(title, id, md string) revel.Result {
 
 	var validID int64
 
+	_, err = GetArtInfoByID(id)
 	if err != nil {
 
 		if err == ErrIDEmpty {
@@ -135,7 +150,14 @@ func (c Blog) Save(title, id, md string) revel.Result {
 	}
 	path := filepath.Join(dir, id)
 	c.Log.Debugf("Wirte to file %v .\n", path)
-	ioutil.WriteFile(path, []byte(md), 0644)
+	err = ioutil.WriteFile(path, []byte(md), 0644)
+	if err != nil {
+	    return c.RenderError(err)
+	}
+	err = ioutil.WriteFile(path + ".html", []byte(html), 0644)
+	if err != nil {
+		return c.RenderError(err)
+	}
 
 	updateStmt, err := app.DB.Prepare(updateFileSQL)
 	if err != nil {
@@ -152,5 +174,5 @@ func (c Blog) Save(title, id, md string) revel.Result {
 		return c.RenderError(err)
 	}
 	c.Log.Debugf("Affected %v rows.\n", n)
-	return c.Redirect("/blog/home")
+	return nil
 }
