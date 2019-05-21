@@ -42,9 +42,28 @@
         .btns-div {
             position: absolute;
             top: 10%;
-            padding-left: 76%;
+            left: 76%;
             border-bottom: #D3D3D3 solid 1px;
-            width: 100%;
+            width: 24%;
+            padding-bottom: 5px;
+            margin-top: 1%;
+        }
+        .title-div {
+            position: absolute;
+            top: 10%;
+            left: 0;
+            border-bottom: #D3D3D3 solid 1px;
+            border-right: #D3D3D3 dotted 1px;
+            width: 47%;
+            padding: 5px 5% 9px 3%;
+            margin-top: 1%;
+            margin-left: 20%;
+        }
+        .article-header {
+            position: absolute;
+            padding-left: 10%;
+            width: 77%;
+
         }
     </style>
     <script>
@@ -56,15 +75,17 @@
 
 
 <body >
-<header class="uk-heading-divider">
+<header class="uk-heading-divider article-header">
     <h1> {{.owner}}'s blog</h1>
 </header>
+
+<h2 class="title-div">{{.title}}</h2>
 
 <div class="btns-div" uk-margin btns>
     <a class="uk-button uk-button-default custom-btn" id="home-btn"
        href="/blog/home" ><span class="uinfo" uk-icon="home"></span></a>
     <a class="uk-button uk-button-default custom-btn" id="edit-md-btn"
-       href="/blog/editor?article=5"><span class="uinfo" uk-icon="file-edit"></span></a>
+       href="/blog/editor?article={{.id}}"><span class="uinfo" uk-icon="file-edit"></span></a>
 </div>
 
 <div  id="block-article">

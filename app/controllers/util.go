@@ -100,6 +100,10 @@ func GetArtInfoByID(id string) (*ArtInfo, error) {
 		}
 	}
 
+	if artInfo.Location == "nil" {
+		return artInfo, nil
+	}
+
 	fp, err := os.Open(filepath.Join(app.ArticlePathPrefix, artInfo.Owner, artInfo.Location))
 	if err != nil {
 		return nil, err

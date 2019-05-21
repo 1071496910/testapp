@@ -11,6 +11,9 @@
 
     <!-- JQuery JS -->
     <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- jQuery Modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
    <style>
 
         #block-article  {
@@ -66,8 +69,25 @@
                 $.get("/blog/articleByTag?tag="+filter,function (data) {
                     $("#article-list").html(data)
                 });
-
             }
+
+            $("#create-article-btn").click(function () {
+                art_name = $("#article-name-input").val();
+                create_result = false;
+                if (art_name != "") {
+                    console.log(art_name);
+                    $.get("/blog/newArticle?title="+art_name,
+                            function (data, status) {
+                                console.log(data, status);
+                                if (status=="success") {
+                                    UIkit.notification({message: 'Create article ' + art_name + ' success.', status: 'success'});
+                                    window.location.replace("/blog/editor?article="+data)
+                                }
+                            });
+                }
+                updateArtList();
+
+            });
 
             $(".art-tag").click(function () {
                 console.log(this);
@@ -82,13 +102,31 @@
 
 
 <body >
-<header class="uk-heading-divider">
+<header class="uk-heading-divider" style="position: absolute">
     <h1> {{.owner}}'s blog</h1>
 </header>
 
 <div class="btns-div" btns>
-    <a class="uk-button uk-button-default custom-btn" id="edit-md-btn"
-       href="/blog/editor?article="><span uk-icon="icon: file-edit"></span> New</a>
+    <a class="uk-button uk-button-default custom-btn" id="new-md-btn"
+       href="#modal-sections" uk-toggle><span uk-icon="icon: file-edit"></span> New</a>
+</div>
+
+{{/*<a class="uk-button uk-button-default" href="#modal-sections" uk-toggle>Open</a>*/}}
+
+<div id="modal-sections" uk-modal>
+    <div class="uk-modal-dialog">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <div class="uk-modal-header">
+            <h2 class="uk-modal-title">New article</h2>
+        </div>
+        <div class="uk-modal-body">
+            <input id="article-name-input" class="uk-input">
+        </div>
+        <div class="uk-modal-footer uk-text-right">
+            <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+            <button id="create-article-btn" class="uk-button uk-modal-close uk-button-primary" type="button">Create</button>
+        </div>
+    </div>
 </div>
 
 {{/*<div class="uk-divider-vertical uk-sticky" style="position: sticky; top: 0; float: left; margin-left: 17%; height: 300px" ></div>*/}}

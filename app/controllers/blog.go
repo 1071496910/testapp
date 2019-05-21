@@ -31,9 +31,9 @@ type Blog struct {
 }
 
 func (c Blog) Home(name string) revel.Result {
-	loginInfo,err := GetLoginInfo(c.Log,c.Controller)
+	loginInfo, err := GetLoginInfo(c.Log, c.Controller)
 	if err != nil {
-	    return c.RenderError(err)
+		return c.RenderError(err)
 	}
 	c.ViewArgs["owner"] = loginInfo.Name
 	return c.Render()
@@ -59,7 +59,7 @@ func (c Blog) ArticleByTag(tag string) revel.Result {
 
 	loginInfo, err := GetLoginInfo(c.Log, c.Controller)
 	if err != nil {
-	    return c.RenderError(err)
+		return c.RenderError(err)
 	}
 	owner := loginInfo.Name
 
@@ -77,7 +77,7 @@ func (c Blog) ArticleByTag(tag string) revel.Result {
 	rows := &sql.Rows{}
 	if tag != "" {
 		rows, err = stmt.Query(owner, tag)
-	}  else {
+	} else {
 		rows, err = stmt.Query(owner)
 	}
 	if err != nil {
@@ -101,6 +101,30 @@ func (c Blog) ArticleByTag(tag string) revel.Result {
 	return c.Render()
 }
 
+//
+func (c Blog) NewArticle(title string) revel.Result {
+	loginInfo, err := GetLoginInfo(c.Log, c.Controller)
+	if err != nil {
+		return c.RenderError(err)
+	}
+
+	stmt, err := app.DB.Prepare(addNewFileSQL)
+	if err != nil {
+		return c.RenderError(err)
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(loginInfo.Name, title)
+	if err != nil {
+		return c.RenderError(err)
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return c.RenderError(err)
+	}
+	return c.RenderText("%v", id)
+}
+
 func (c Blog) Article(article string) revel.Result {
 	if article == "" {
 		return c.RenderJSON("")
@@ -117,10 +141,12 @@ func (c Blog) Read(id string) revel.Result {
 	artInfo, err := GetArtInfoByID(id)
 
 	if err != nil {
-	    return c.RenderError(err)
+		return c.RenderError(err)
 	}
 	c.ViewArgs["artHTML"] = artInfo.HTML
 	c.ViewArgs["owner"] = artInfo.Owner
+	c.ViewArgs["id"] = id
+	c.ViewArgs["title"] = artInfo.Title
 	return c.Render()
 }
 
@@ -138,26 +164,7 @@ func (c Blog) Save(title, id, md, html string) revel.Result {
 
 	_, err = GetArtInfoByID(id)
 	if err != nil {
-
-		if err == ErrIDEmpty {
-
-			stmt, err := app.DB.Prepare(addNewFileSQL)
-			if err != nil {
-				return c.RenderError(err)
-			}
-			defer stmt.Close()
-
-			rest, err := stmt.Exec(lastLoginInfo.Name, title)
-			if err != nil {
-				return c.RenderError(err)
-			}
-			validID, err = rest.LastInsertId()
-			if err != nil {
-				return c.RenderError(err)
-			}
-		} else {
-			return c.RenderError(err)
-		}
+		return c.RenderError(err)
 	} else {
 		validID, err = strconv.ParseInt(id, 10, 64)
 		if err != nil {
@@ -176,9 +183,9 @@ func (c Blog) Save(title, id, md, html string) revel.Result {
 	c.Log.Debugf("Wirte to file %v .\n", path)
 	err = ioutil.WriteFile(path, []byte(md), 0644)
 	if err != nil {
-	    return c.RenderError(err)
+		return c.RenderError(err)
 	}
-	err = ioutil.WriteFile(path + ".html", []byte(html), 0644)
+	err = ioutil.WriteFile(path+".html", []byte(html), 0644)
 	if err != nil {
 		return c.RenderError(err)
 	}
